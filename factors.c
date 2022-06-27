@@ -6,24 +6,28 @@
 void factor(mpz_t *p, mpz_t n)
 {
 	mpz_t r;
-	
-	mpz_set_ui(*p, 2U);
 
-	if (mpz_divisible_ui_p(n, 2U))
+	mpz_set_ui(*p, 2U);
+	if (mpz_divisible_p(n, *p))
 		return;
 
 	mpz_init(r);
 	mpz_sqrt(r, n);
-	mpz_set_ui(*p, 3U);
-	mpz_sqrt(r, n);
 
-	while (!mpz_divisible_p(n, *p) && mpz_cmp(*p, r) < 0)
+	if (mpz_divisible_p(n, r))
+	{
+		mpz_set(*p, r);
+		mpz_clear(r);
+		return;
+	}
+
+	mpz_set_ui(*p, 3U);
+
+	while (!mpz_divisible_p(n, *p) && mpz_cmp(r, *p) > 0)
 		mpz_add_ui(*p, *p, 2U);
-		
+
 	if (!mpz_divisible_p(n, *p))
 		mpz_set(*p, n);
-
-	mpz_clear(r);
 }
 
 int main(int ac, char **av)
