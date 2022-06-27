@@ -62,9 +62,6 @@ int main(int ac, char **av)
 		factor(&p, n);
 		mpz_tdiv_q(q, n, p);
 
-		if (mpz_cmp(p, q) > 0)
-			mpz_swap(p, q);
-
 		mpz_out_str(stdout, 10, n);
 		printf("=");
 		mpz_out_str(stdout, 10, q);
