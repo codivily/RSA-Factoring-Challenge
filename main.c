@@ -3,6 +3,29 @@
 #include <unistd.h>
 #include <gmp.h>
 
+void factor(mpz_t *p, mpz_t n)
+{
+	mpz_t r;
+	
+	mpz_set_ui(*p, 2U);
+
+	if (mpz_divisible_ui_p(n, 2U))
+		return;
+
+	mpz_init(r);
+	mpz_sqrt(r, n);
+	mpz_set_ui(*p, 3U);
+	mpz_sqrt(r, n);
+
+	while (!mpz_divisible_p(n, *p) && mpz_cmp(*p, r) < 0)
+		mpz_add_ui(*p, *p, 2U);
+		
+	if (!mpz_divisible_p(n, *p))
+		mpz_set(*p, n);
+
+	mpz_clear(r);
+}
+
 int main(int ac, char **av)
 {
 	FILE *fp = NULL;
@@ -36,25 +59,8 @@ int main(int ac, char **av)
 		
 		mpz_set_str(n, line, 10);
 
-		mpz_set_ui(p, 2U);
-
-		if (!mpz_divisible_p(n, p))
-		{
-			mpz_set_ui(p, 3U);
-			mpz_sqrt(r, n);
-			while (!mpz_divisible_p(n, p) && mpz_cmp(p, r) < 0)
-				mpz_add_ui(p, p, 2U);
-			
-			if (!mpz_divisible_p(n, p))
-			{
-				mpz_set_ui(p, 1U);
-				mpz_set(q, n);
-			}
-			else
-				mpz_tdiv_q(q, n, p);
-		}
-		else 
-			mpz_tdiv_q(q, n, p);
+		factor(&p, n);
+		mpz_tdiv_q(q, n, p);
 
 		if (mpz_cmp(p, q) > 0)
 			mpz_swap(p, q);
