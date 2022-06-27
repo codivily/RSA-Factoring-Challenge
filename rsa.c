@@ -5,27 +5,16 @@
 
 void factor(mpz_t *p, mpz_t n, mpz_t s)
 {
-	mpz_t r;
-	
 	mpz_set(*p, s);
 
 	if (mpz_divisible_p(n, s))
 		return;
 
-	mpz_init(r);
-	mpz_sqrt(r, n);
-	mpz_sqrt(r, n);
-
 	if (mpz_divisible_ui_p(*p, 2U))
-		mpz_add_ui(*p, *p, 1U);
+		mpz_sub_ui(*p, *p, 1U);
 
-	while (!mpz_divisible_p(n, *p) && mpz_cmp(*p, r) < 0)
-		mpz_add_ui(*p, *p, 2U);
-		
-	if (!mpz_divisible_p(n, *p))
-		mpz_set(*p, n);
-
-	mpz_clear(r);
+	while (!mpz_divisible_p(n, *p) && mpz_cmp_ui(*p, 1U) > 0)
+		mpz_sub_ui(*p, *p, 2U);	
 }
 
 int is_prime(mpz_t op)
@@ -36,10 +25,11 @@ int is_prime(mpz_t op)
 	mpz_init(s);
 	mpz_init(r);
 
-	mpz_set_ui(s, 2U);
+	mpz_sqrt(s, op);
 	factor(&r, op, s);
 	
-	yesOrNo = (mpz_cmp(op, r) == 0);
+
+	yesOrNo = (mpz_cmp_ui(r, 1) == 0);
 
 	mpz_clear(s);
 	mpz_clear(r);
@@ -74,8 +64,6 @@ int main(int ac, char **av)
 		exit(EXIT_FAILURE);
 	}
 
-	mpz_set_ui(p, 2U);
-
 	while ((line_length = getline(&line, &line_size, fp)) != -1)
 	{
 		line[line_length - 1] = '\0';
@@ -84,16 +72,20 @@ int main(int ac, char **av)
 
 		while (1)
 		{
-			factor(&p, n, p);
-			if (is_prime(p))
+			while (1)
+			{
+				mpz_sqrt(p, n);
+				factor(&p, n, p);
+				if (is_prime(p))
+					break;
+				mpz_sub_ui(p, p, 2U);
+			}
+			mpz_tdiv_q(q, n, p);
+			if (is_prime(q))
 				break;
-			mpz_add_ui(p, p, 2U);
+			mpz_sub_ui(p, p, 2U);
 		}
 
-		mpz_tdiv_q(q, n, p);
-
-		if (!is_prime(q))
-			continue;
 
 		mpz_out_str(stdout, 10, n);
 		printf("=");
