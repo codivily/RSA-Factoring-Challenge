@@ -39,12 +39,15 @@ int main(int ac, char **av)
 		mpz_set_ui(p, 2U);
 
 		if (!mpz_divisible_p(n, p))
-		{
 			mpz_set_ui(p, 3U);
-			
-			while (!mpz_divisible_p(n, p))
-				mpz_add_ui(p, p, 2U);
-		}
+
+		mpz_sqrt(r, n);
+
+		while (!mpz_divisible_p(n, p) && mpz_cmp(p, r) < 0)
+			mpz_add_ui(p, p, 2U);
+
+		if (!mpz_divisible_p(n, p))
+			mpz_set(p, n);
 		
 		mpz_tdiv_q(q, n, p);
 
